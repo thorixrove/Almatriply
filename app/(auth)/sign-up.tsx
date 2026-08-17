@@ -1,10 +1,13 @@
-import { View, Text } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import React from 'react'
 
 export default function SignUp() {
-  return (
-    <View className='flex-1 items-center justify-center bg-white'>
-      <Text className='text-xl font-bold'>SignUp</Text>
-    </View>
-  )
+  return
+  <ScrollView 
+  contentContainerStyle={{ flexGrow: 1}}
+  className='bg-white'
+  keyboardShouldPersistTaps
+  >
+
+  </ScrollView>
 }
