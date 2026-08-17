@@ -2,10 +2,12 @@ import { View, Text, ScrollView, Image, TextInput, TouchableOpacity, ActivityInd
 import React, { useState } from 'react'
 import { useSignIn } from '@clerk/expo'
 import { useRouter, Link } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function SignInScreen() {
   const { signIn, errors, fetchStatus} = useSignIn()
   const router = useRouter()
+  const [ showPassword, setShowPassword] = useState(false)
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -165,14 +167,29 @@ export default function SignInScreen() {
         </Text>
       )}
 
-      <TextInput
-        className="w-full border border-gray-300 rounded-xl px-4 py-3 mb-6"
-        placeholder="Password"
-        placeholderTextColor="#9CA3AF"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+          <View className="relative justify-center mb-4">
+            <TextInput
+              className="w-full border border-[#E8E6DF] bg-white rounded-xl px-4 py-3 pr-12 text-[#1A1D26]"
+              placeholder="Password"
+              placeholderTextColor="#9CA3AF"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword((prev) => !prev)}
+              className="absolute right-4 top-1/2"
+              style={{ transform: [{ translateY: -10 }] }}
+            >
+              <Ionicons
+                size={20}
+                name={showPassword ? "eye" : "eye-off"}
+                color="#8A8D96"
+              />
+            </TouchableOpacity>
+          </View>
+
+
       {errors.fields.password && (
         <Text className='text-red-500 mb-4'>
           {errors.fields.password.message}

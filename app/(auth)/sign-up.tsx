@@ -2,11 +2,14 @@ import { View, Text, ScrollView, Image, TextInput, TouchableOpacity, ActivityInd
 import React, { useState } from 'react'
 import { useAuth, useSignUp } from '@clerk/expo'
 import { useRouter, Link } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function SignUpScreen() {
-  const { signUp, errors, fetchStatus} = useSignUp()
-  const {isSignedIn} = useAuth()
+  const { signUp, errors, fetchStatus } = useSignUp()
+  const { isSignedIn } = useAuth()
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+
 
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
@@ -15,7 +18,7 @@ export default function SignUpScreen() {
   const [code, setCode] = useState("")
 
   const onSignUpPress = async () => {
-    const { error} = await signUp.password({
+    const { error } = await signUp.password({
       emailAddress: email,
       password,
       firstName,
@@ -27,7 +30,7 @@ export default function SignUpScreen() {
       return
     }
 
-    if(!error) await signUp.verifications.sendEmailCode()
+    if (!error) await signUp.verifications.sendEmailCode()
   }
 
   const onVerifyPress = async () => {
@@ -37,7 +40,7 @@ export default function SignUpScreen() {
 
     if (signUp.status === "complete") {
       await signUp.finalize({
-        navigate: ({ session, decorateUrl}) => {
+        navigate: ({ session, decorateUrl }) => {
           if (session?.currentTask) {
             console.log(session?.currentTask)
             return
@@ -54,7 +57,7 @@ export default function SignUpScreen() {
 
   const isLoading = fetchStatus === "fetching"
 
-  if  (signUp.status === "complete" || isSignedIn) {
+  if (signUp.status === "complete" || isSignedIn) {
     return null
   }
 
@@ -64,159 +67,175 @@ export default function SignUpScreen() {
     signUp.unverifiedFields.includes("email_address") &&
     signUp.missingFields.length === 0
   ) {
-    return(
-          <KeyboardAvoidingView
-      behavior={Platform.OS === "android" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "android" ? 20:0}
-      className="flex-1 bg-white"
-    >
-      <View className="flex-1 justify-center items-center bg-white px-6">
-        <Image
-          source={require("../../assets/images/almatriply.png")}
-          className="w-32 h-16 mb-8"
-          resizeMode="contain"
-        />
-        <Text className="text-2xl font-bold text-gray-800 mb-2">
-          Verify your account
-        </Text>
-        <Text className='text-gray-500 mb-8 text-center'>
-          we sent a code to {email}
-        </Text>
-
-
-        <TextInput
-          className="w-full border border-gray-300 rounded-xl px-4 py-3 mb-4"
-          placeholder="Enter verification code"
-          placeholderTextColor="#9CA3AF"
-          keyboardType="number-pad"
-          value={code}
-          onChangeText={setCode}
-        />
-        {errors.fields.code && (
-          <Text className='text-red-500 mb-4'>
-            {errors.fields.code.message}
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "android" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "android" ? 20 : 0}
+        className="flex-1 bg-white"
+      >
+        <View className="flex-1 justify-center items-center bg-white px-6">
+          <Image
+            source={require("../../assets/images/almatriply.png")}
+            className="w-32 h-16 mb-8"
+            resizeMode="contain"
+          />
+          <Text className="text-2xl font-bold text-gray-800 mb-2">
+            Verify your account
           </Text>
-        )}
+          <Text className='text-gray-500 mb-8 text-center'>
+            we sent a code to {email}
+          </Text>
 
-        <TouchableOpacity
-        onPress={onVerifyPress}
-        disabled={isLoading}
-        className="w-full bg-blue-600 py-4 rounded-xl items-center mb-4"
-        >
-          {isLoading ? (
-            <ActivityIndicator color="white"/>
-          ) : (
-            <Text className='text-white font-bold text-base'>Verify</Text>
+
+          <TextInput
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 mb-4"
+            placeholder="Enter verification code"
+            placeholderTextColor="#9CA3AF"
+            keyboardType="number-pad"
+            value={code}
+            onChangeText={setCode}
+          />
+          {errors.fields.code && (
+            <Text className='text-red-500 mb-4'>
+              {errors.fields.code.message}
+            </Text>
           )}
-        </TouchableOpacity>
 
-        <TouchableOpacity
-        onPress={() => signUp.verifications.sendEmailCode()}
-        className='py-2'
-        >
-          <Text className='text-blue-600'>I need a new code</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={onVerifyPress}
+            disabled={isLoading}
+            className="w-full bg-blue-600 py-4 rounded-xl items-center mb-4"
+          >
+            {isLoading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className='text-white font-bold text-base'>Verify</Text>
+            )}
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => signUp.reset()} className='py-2'>
-          <Text className='text-blue-600'>Start over</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            onPress={() => signUp.verifications.sendEmailCode()}
+            className='py-2'
+          >
+            <Text className='text-blue-600'>I need a new code</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => signUp.reset()} className='py-2'>
+            <Text className='text-blue-600'>Start over</Text>
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     )
   }
 
   // Sign up form
-  return(
-          <KeyboardAvoidingView
+  return (
+    <KeyboardAvoidingView
       behavior={Platform.OS === "android" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "android" ? 20:0}
+      keyboardVerticalOffset={Platform.OS === "android" ? 20 : 0}
       className="flex-1 bg-white"
     >
-  <ScrollView 
-  contentContainerStyle={{ flexGrow: 1}}
-  className='bg-white'
-  keyboardShouldPersistTaps="handled"
-  >
-    <View className='flex-1 justify-center px-6 py-12'>
-      <Image
-      source={require("../../assets/images/almatriply.png")}
-      className='w-32 h-16 mb-8'
-      resizeMode='contain'
-      />
-      <Text className='text-3xl font-bold text-gray-800 mb-2'>
-        Create Account
-      </Text>
-      <Text className='text-gray-500 mb-8'>Find your dream home today</Text>
-      <View className='flex-row gap-3 mb-4'>
-        <TextInput
-        className='flex-1 border border-gray-300 rounded-xl px-4 py-3'
-        placeholder='First name'
-        placeholderTextColor="#9CA3AF"
-        value={firstName}
-        onChangeText={setFirstName}
-        autoCapitalize='words'
-        />
-        <TextInput
-          className="flex-1 border border-gray-300 rounded-xl px-4 py-3"
-          placeholder="Last name"
-          placeholderTextColor="#9CA3AF"
-          value={lastName}
-          onChangeText={setLastName}
-          autoCapitalize='words'
-        />
-      </View>
-
-      <TextInput
-        className="w-full border border-gray-300 rounded-xl px-4 py-3 mb-4"
-        placeholder="Email address"
-        placeholderTextColor="#9CA3AF"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType='email-address'
-        autoCapitalize='none'
-      />
-      {errors.fields.emailAddress && (
-        <Text className='text-red-500 mb-4'>
-          {errors.fields.emailAddress.message}
-        </Text>
-      )}
-
-      <TextInput
-        className="w-full border border-gray-300 rounded-xl px-4 py-3 mb-6"
-        placeholder="Password"
-        placeholderTextColor="#9CA3AF"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      {errors.fields.password && (
-        <Text className='text-red-500 mb-4'>
-          {errors.fields.password.message}
-        </Text>
-      )}
-
-      <TouchableOpacity
-      onPress={onSignUpPress}
-      disabled={isLoading}
-      className="w-full bg-blue-600 py-4 rounded-xl items-center mb-4"
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        className='bg-white'
+        keyboardShouldPersistTaps="handled"
       >
-        {isLoading ? (
-          <ActivityIndicator color="white"/>
-        ) : (
-          <Text className='text-white font-bold text-base'>Sign Up</Text>
-        )}
-      </TouchableOpacity>
+        <View className='flex-1 justify-center px-6 py-12'>
+          <Image
+            source={require("../../assets/images/almatriply.png")}
+            className='w-32 h-16 mb-8'
+            resizeMode='contain'
+          />
+          <Text className='text-3xl font-bold text-gray-800 mb-2'>
+            Create Account
+          </Text>
+          <Text className='text-gray-500 mb-8'>Find your dream home today</Text>
+          <View className='flex-row gap-3 mb-4'>
+            <TextInput
+              className='flex-1 border border-gray-300 rounded-xl px-4 py-3'
+              placeholder='First name'
+              placeholderTextColor="#9CA3AF"
+              value={firstName}
+              onChangeText={setFirstName}
+              autoCapitalize='words'
+            />
+            <TextInput
+              className="flex-1 border border-gray-300 rounded-xl px-4 py-3"
+              placeholder="Last name"
+              placeholderTextColor="#9CA3AF"
+              value={lastName}
+              onChangeText={setLastName}
+              autoCapitalize='words'
+            />
+          </View>
 
-      <View className='flex-row justify-center'>
-        <Text className='text-gray-500'>Already have an account</Text>
-        <Link href="/sign-in">
-        <Text className='text-blue-600 font-semibold'>Sign In</Text>
-        </Link>
-      </View>
+          <TextInput
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 mb-4"
+            placeholder="Email address"
+            placeholderTextColor="#9CA3AF"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType='email-address'
+            autoCapitalize='none'
+          />
+          {errors.fields.emailAddress && (
+            <Text className='text-red-500 mb-4'>
+              {errors.fields.emailAddress.message}
+            </Text>
+          )}
 
-      <View nativeID='clerk-captcha'/>
-    </View>
-  </ScrollView>
-  </KeyboardAvoidingView>
+
+          <View className="relative justify-center mb-4">
+            <TextInput
+              className="w-full border border-[#E8E6DF] bg-white rounded-xl px-4 py-3 pr-12 text-[#1A1D26]"
+              placeholder="Password"
+              placeholderTextColor="#9CA3AF"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword((prev) => !prev)}
+              className="absolute right-4 top-1/2"
+              style={{ transform: [{ translateY: -10 }] }}
+            >
+              <Ionicons
+                size={20}
+                name={showPassword ? "eye" : "eye-off"}
+                color="#8A8D96"
+              />
+            </TouchableOpacity>
+          </View>
+          
+
+          {errors.fields.password && (
+            <Text className='text-red-500 mb-4'>
+              {errors.fields.password.message}
+            </Text>
+          )}
+
+          <TouchableOpacity
+            onPress={onSignUpPress}
+            disabled={isLoading}
+            className="w-full bg-blue-600 py-4 rounded-xl items-center mt-2 mb-4"
+          >
+            {isLoading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className='text-white font-bold text-base'>Sign Up</Text>
+            )}
+          </TouchableOpacity>
+
+          <View className='flex-row justify-center'>
+            <Text className='text-gray-500'>Already have an account</Text>
+            <Link href="/sign-in">
+              <Text className='text-blue-600 font-semibold'>Sign In</Text>
+            </Link>
+          </View>
+
+          <View nativeID='clerk-captcha' />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
