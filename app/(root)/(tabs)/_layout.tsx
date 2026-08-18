@@ -1,49 +1,10 @@
 import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
 import {Feather} from "@expo/vector-icons"
 import { Tabs } from 'expo-router';
+import { useUserStore } from '@/store/useStore';
 
-
-const useNativeTabs = false
-
-export default function TabLayout() {
-    if (useNativeTabs) {
-  return (
-    <NativeTabs
-        backgroundColor="#0B0E14"
-        tintColor="#4A9EFF"
-        iconColor={{ default: "#5C5F68", selected: "#4A9EFF" }}
-        labelStyle={{
-        default: { color: "#5C5F68" },
-        selected: { color: "#4A9EFF" },
-        }}
-    >
-      <NativeTabs.Trigger name="index">
-        <Label>Home</Label>
-        <Icon sf="house.fill"/>
-      </NativeTabs.Trigger>
-
-     <NativeTabs.Trigger name="search">
-        <Icon sf="magnifyingglass" />
-        <Label>Search</Label>
-      </NativeTabs.Trigger>
-
-        <NativeTabs.Trigger name="create">
-          <Icon sf="plus.circle.fill" />
-          <Label>Add Property</Label>
-        </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="saved">
-        <Icon sf="heart.fill" />
-        <Label>Saved</Label>
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="profile">
-        <Icon sf="person.fill" />
-        <Label>Profile</Label>
-      </NativeTabs.Trigger>
-    </NativeTabs>
-  );
-}
+function AndroidTabs() {
+  const isAdmin = useUserStore((state) => state.isAdmin)
 
 return (
     <Tabs
@@ -73,14 +34,15 @@ return (
         options={{
           title: "Search",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="list" size={size} color={color} />
+            <Feather name="search" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="create"
         options={{
-          title: "Add Property",
+          title: "Add",
+          href: isAdmin ? undefined : null,
           tabBarIcon: ({ color, size }) => (
             <Feather name="plus-circle" size={size} color={color} />
           ),
@@ -106,4 +68,8 @@ return (
       />
     </Tabs>
   );
+}
+
+export default function TabsLayout() {
+  return <AndroidTabs/>
 }
