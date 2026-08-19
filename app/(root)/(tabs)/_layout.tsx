@@ -1,11 +1,11 @@
-import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
+
 import {Feather} from "@expo/vector-icons"
 import { Tabs } from 'expo-router';
 import { useUserStore } from '@/store/useStore';
 
 function AndroidTabs() {
   const isAdmin = useUserStore((state) => state.isAdmin)
-
+  
 return (
     <Tabs
       screenOptions={{
@@ -15,7 +15,7 @@ return (
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
           borderTopColor: "#E8E6DF",
-          paddingTop: 4,
+          paddingTop: 10,
           height: 100,
         },
       }}

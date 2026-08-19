@@ -18,6 +18,7 @@ export const useUserSync = () => {
         .select("clerk_id, is_admin")
         .eq("clerk_id", user!.id)
         .single()
+        
 
         if (data) {
             setIsAdmin(data.is_admin ?? false)
