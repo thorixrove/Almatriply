@@ -104,10 +104,11 @@ export default function HomeScreen() {
 
 
             {/* Featured section */}
-            <View className="mb-10">
+            <View className="mb-6">
               <Text className="text-gray-900 text-lg font-bold px-5 mb-4">
                 Featured
               </Text>
+
               {loading ? (
                 <ActivityIndicator
                   size="small"
@@ -121,7 +122,7 @@ export default function HomeScreen() {
                   renderItem={({ item }) => <FeaturedCard property={item} />}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 8 }}
+                  contentContainerStyle={{ paddingHorizontal: 20 }}
                 />
               )}
             </View>
