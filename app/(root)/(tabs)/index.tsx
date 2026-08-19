@@ -52,7 +52,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView edges={['top']} className="flex-1 bg-gray-50">
       <FlatList
         data={recommended}
         keyExtractor={(item) => item.id}
