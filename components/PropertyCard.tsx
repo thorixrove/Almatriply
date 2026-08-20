@@ -92,7 +92,7 @@ export default function PropertyCard({
       className="w-10 items-center pt-3"
       >
         <Ionicons
-        name={isSaved ? "heart" : "heart-outline" }
+        name={isSaved ? "bookmark" : "bookmark-outline" }
         size={18}
         color={isSaved ? "#EF4444" : "#9CA3AF"}
         />
