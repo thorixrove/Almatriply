@@ -1,11 +1,14 @@
-import { useSupabase } from "./useSupabase"
+import { useUserStore } from "@/store/useStore"
 import { useAuth } from "@clerk/expo"
 import { useEffect, useState } from "react"
+import { useSupabase } from "./useSupabase"
 
 
 export function useSavedProperty(propertyId: string, onUnsave?: () => void) {
     const {userId} = useAuth()
     const authSupabase = useSupabase()
+    const incrementSavedCount = useUserStore((state) => state.incrementSavedCount)
+    const decrementSavedCount = useUserStore((state) => state.decrementSavedCount)
 
     const [ isSaved, setIsSaved] = useState(false)
     const [ saveLoading, setSaveLoading] = useState(false)
@@ -35,12 +38,14 @@ export function useSavedProperty(propertyId: string, onUnsave?: () => void) {
             .eq("user_clerk_id", userId)
             .eq("property_id", propertyId)
             setIsSaved(false)
+            decrementSavedCount()
             onUnsave?.()
         } else {
             await authSupabase
             .from("saved_properties")
             .insert({ user_clerk_id: userId, property_id: propertyId})
             setIsSaved(true)
+            incrementSavedCount()
         }
         setSaveLoading(false)
     }

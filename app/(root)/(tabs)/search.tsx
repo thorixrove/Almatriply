@@ -1,14 +1,14 @@
-import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import { Ionicons } from "@expo/vector-icons"
-import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
-import { Property } from "@/types"
-import { useFilterStore } from "@/store/filterStore"
-import { formatPrice } from "@/lib/utils"
-import PropertyCard from "@/components/PropertyCard"
 import FilterModal from "@/components/FilterModal"
+import PropertyCard from "@/components/PropertyCard"
+import { supabase } from "@/lib/supabase"
+import { formatPrice } from "@/lib/utils"
+import { useFilterStore } from "@/store/filterStore"
+import { Property } from "@/types"
+import { Ionicons } from "@expo/vector-icons"
 import { useLocalSearchParams } from "expo-router"
+import { useEffect, useState } from "react"
+import { ActivityIndicator, FlatList, Text, TextInput, TouchableOpacity, useColorScheme, View } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 
 export default function SearchScreen() {
@@ -16,6 +16,8 @@ export default function SearchScreen() {
   const [loading, setLoading] = useState(false)
   const [showFilter, setShowFilter] = useState(false)
   const { openFilters } = useLocalSearchParams<{ openFilters?: string }>()
+  const colorScheme = useColorScheme()
+  const isDark = colorScheme === "dark"
 
 
   useEffect(() => {
@@ -81,17 +83,17 @@ export default function SearchScreen() {
   }
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-gray-50">
+    <SafeAreaView edges={['top']} className="flex-1 bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <View className="px-5 pt-4 pb-3">
-        <Text className="text-2xl font-bold text-gray-900 mb-4">
+        <Text className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Find Property
         </Text>
 
         {/* Search Bar + Filter Button */}
         <View className="flex-row items-center gap-3">
           <View
-            className="flex-1 flex-row items-center bg-white rounded-2xl px-4 gap-3"
+            className="flex-1 flex-row items-center bg-white dark:bg-gray-800 rounded-2xl px-4 gap-3"
             style={{
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 1 },
@@ -100,18 +102,18 @@ export default function SearchScreen() {
               elevation: 2,
             }}
           >
-            <Ionicons name="search-outline" size={18} color="#9CA3AF" />
+            <Ionicons name="search-outline" size={18} color={isDark ? "#6B7280" : "#9CA3AF"} />
             <TextInput
-              className="flex-1 py-3 text-gray-800"
-              placeholder="Search by title pr city..."
-              placeholderTextColor="#9CA3AF"
+              className="flex-1 py-3 text-gray-800 dark:text-gray-100"
+              placeholder="Search by title or city..."
+              placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
               value={search}
               onChangeText={setSearch}
               autoCapitalize="none"
             />
             {search.length > 0 && (
               <TouchableOpacity onPress={() => setSearch("")}>
-                <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+                <Ionicons name="close-circle" size={18} color={isDark ? "#6B7280" : "#9CA3AF"} />
               </TouchableOpacity>
             )}
           </View>
@@ -119,8 +121,9 @@ export default function SearchScreen() {
           {/* Filter Button */}
           <TouchableOpacity
             onPress={() => setShowFilter(true)}
-            className={`w-12 h-12 rounded-2xl items-center justify-center ${activeFilterCount > 0 ? "bg-blue-600" : "bg-white"
-              }`}
+            className={`w-12 h-12 rounded-2xl items-center justify-center ${
+              activeFilterCount > 0 ? "bg-blue-600" : "bg-white dark:bg-gray-800"
+            }`}
             style={{
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 1 },
@@ -133,7 +136,7 @@ export default function SearchScreen() {
             <Ionicons
               name="options-outline"
               size={20}
-              color={activeFilterCount > 0 ? "#fff" : "#374151"}
+              color={activeFilterCount > 0 ? "#fff" : isDark ? "#D1D5DB" : "#374151"}
             />
             {activeFilterCount > 0 && (
               <View className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full items-center justify-center">
@@ -149,32 +152,32 @@ export default function SearchScreen() {
         {activeFilterCount > 0 && (
           <View className="flex-row flex-wrap gap-2 mt-3">
             {type && (
-              <View className="flex-row items-center bg-blue-50 border border-blue-200 rounded-full px-3 py-1 gap-1">
-                <Text className="text-blue-700 text-xs font-semibold capitalize">
+              <View className="flex-row items-center bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-full px-3 py-1 gap-1">
+                <Text className="text-blue-700 dark:text-blue-400 text-xs font-semibold capitalize">
                   {type}
                 </Text>
                 <TouchableOpacity onPress={() => setType(null)}>
-                  <Ionicons name="close" size={12} color="#1D4ED8" />
+                  <Ionicons name="close" size={12} color={isDark ? "#60A5FA" : "#1D4ED8"} />
                 </TouchableOpacity>
               </View>
             )}
             {bedrooms !== null && (
-              <View className="flex-row items-center bg-blue-50 border border-blue-200 rounded-full px-3 py-1 gap-1">
-                <Ionicons name="bed-outline" size={11} color="#1D4ED8" />
-                <Text className="text-blue-700 text-xs font-semibold">
+              <View className="flex-row items-center bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-full px-3 py-1 gap-1">
+                <Ionicons name="bed-outline" size={11} color={isDark ? "#60A5FA" : "#1D4ED8"} />
+                <Text className="text-blue-700 dark:text-blue-400 text-xs font-semibold">
                   {bedrooms === 4
                     ? "4+ beds"
                     : `${bedrooms} bed${bedrooms > 1 ? "s" : ""}`
                   }
                 </Text>
                 <TouchableOpacity onPress={() => setBedrooms(null)}>
-                  <Ionicons name="close" size={12} color="#1D4ED8" />
+                  <Ionicons name="close" size={12} color={isDark ? "#60A5FA" : "#1D4ED8"} />
                 </TouchableOpacity>
               </View>
             )}
             {(minPrice !== null || maxPrice !== null) && (
-              <View className="flex-row items-center bg-blue-50 border border-blue-200 rounded-full px-3 py-1 gap-1">
-                <Text className="text-blue-700 text-xs font-semibold">
+              <View className="flex-row items-center bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-full px-3 py-1 gap-1">
+                <Text className="text-blue-700 dark:text-blue-400 text-xs font-semibold">
                   {minPrice && maxPrice
                     ? `${formatPrice(minPrice)} – ${formatPrice(maxPrice)}`
                     : minPrice
@@ -188,7 +191,7 @@ export default function SearchScreen() {
                     setMaxPrice(null)
                   }}
                 >
-                  <Ionicons name="close" size={12} color="#1D4ED8" />
+                  <Ionicons name="close" size={12} color={isDark ? "#60A5FA" : "#1D4ED8"} />
                 </TouchableOpacity>
               </View>
             )}
@@ -205,18 +208,18 @@ export default function SearchScreen() {
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => <PropertyCard property={item} />}
         ListHeaderComponent={
-          <Text className="text-sm text-gray-400 mb-4">
+          <Text className="text-sm text-gray-400 dark:text-gray-500 mb-4">
             {loading ? "Searching..." : `${results.length} properties found`}
           </Text>
         }
         ListEmptyComponent={
           !loading ? (
             <View className="items-center py-20">
-              <Ionicons name="search-outline" size={48} color="#D1D5DB" />
-              <Text className="text-gray-400 mt-4 text-base">
+              <Ionicons name="search-outline" size={48} color={isDark ? "#4B5563" : "#D1D5DB"} />
+              <Text className="text-gray-400 dark:text-gray-500 mt-4 text-base">
                 No properties found
               </Text>
-              <Text className="text-gray-300 text-sm mt-1">
+              <Text className="text-gray-300 dark:text-gray-600 text-sm mt-1">
                 Try a different search or adjust filters
               </Text>
             </View>

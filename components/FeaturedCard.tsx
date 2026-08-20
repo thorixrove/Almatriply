@@ -1,16 +1,18 @@
 import { useRouter } from "expo-router"
-import { Image, Text, TouchableOpacity, View } from "react-native"
+import { Image, Text, TouchableOpacity, View, useColorScheme } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { Property } from "@/types"
 import { formatPrice } from "@/lib/utils"
 
-export default function FeaturedCard({ property}: {property: Property}) {
+export default function FeaturedCard({ property }: { property: Property }) {
   const router = useRouter()
+  const isDark = useColorScheme() === "dark"
+  const mutedColor = isDark ? "#9CA3AF" : "#6B7280"
 
   return (
     <TouchableOpacity
       onPress={() => router.push(`/(root)/property/${property.id}`)}
-      className="w-72 mr-4 rounded-3xl overflow-hidden bg-white"
+      className="w-72 mr-4 rounded-3xl overflow-hidden bg-white dark:bg-gray-800"
       style={{
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
@@ -23,14 +25,14 @@ export default function FeaturedCard({ property}: {property: Property}) {
       {/* Image */}
 
       <Image
-      source={{ uri: property.images[0]}}
-      className="w-full h-44"
-      resizeMode="cover"
+        source={{ uri: property.images[0] }}
+        className="w-full h-44"
+        resizeMode="cover"
       />
 
       {/* Badge */}
-      <View className="absolute top-3 left-3 bg-white/90 px-3 py-1 rounded-full">
-        <Text className="text-xs font-semibold text-blue-600 capitalize">
+      <View className="absolute top-3 left-3 bg-white/90 dark:bg-gray-900/90 px-3 py-1 rounded-full">
+        <Text className="text-xs font-semibold text-blue-600 dark:text-blue-400 capitalize">
           {property.type}
         </Text>
       </View>
@@ -43,32 +45,32 @@ export default function FeaturedCard({ property}: {property: Property}) {
 
       {/* Info */}
       <View className="p-4">
-        <Text 
-        className="text-base font-bold text-gray-800 mb-1"
-        numberOfLines={1}
+        <Text
+          className="text-base font-bold text-gray-800 dark:text-gray-100 mb-1"
+          numberOfLines={1}
         >
           {property.title}
         </Text>
 
         <View className="flex-row items-center gap-1 mb-3">
-          <Ionicons name="location-outline" size={13} color="#6B7280" />
-          <Text className="text-xs text-gray-500" numberOfLines={1}>
+          <Ionicons name="location-outline" size={13} color={mutedColor} />
+          <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
             {property.address}, {property.city}
           </Text>
         </View>
 
         <View className="flex-row items-center justify-between">
-          <Text className="text-blue-600 font-bold text-base">
+          <Text className="text-blue-600 dark:text-blue-400 font-bold text-base">
             {formatPrice(property.price)}
           </Text>
           <View className="flex-row items-center gap-3">
             <View className="flex-row items-center gap-1">
-              <Ionicons name="bed-outline" size={13} color="#6B7280" />
-              <Text className="text-xs text-gray-500">{property.bedrooms}</Text>
+              <Ionicons name="bed-outline" size={13} color={mutedColor} />
+              <Text className="text-xs text-gray-500 dark:text-gray-400">{property.bedrooms}</Text>
             </View>
             <View className="flex-row items-center gap-1">
-              <Ionicons name="water-outline" size={13} color="#6B7280" />
-              <Text className="text-xs text-gray-500">
+              <Ionicons name="water-outline" size={13} color={mutedColor} />
+              <Text className="text-xs text-gray-500 dark:text-gray-400">
                 {property.bathrooms}
               </Text>
             </View>

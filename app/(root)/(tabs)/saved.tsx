@@ -1,13 +1,14 @@
+import PropertyCard from "@/components/PropertyCard"
 import { useSupabase } from "@/hooks/useSupabase"
+import { useUserStore } from "@/store/useStore"
 import { Property } from "@/types"
 import { useAuth } from "@clerk/expo"
 import { Ionicons } from "@expo/vector-icons"
+import { useFocusEffect } from "@react-navigation/native"
 import { useRouter } from "expo-router"
 import { useCallback, useState } from "react"
-import { ActivityIndicator, FlatList, TouchableOpacity, View, Text } from "react-native"
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { useFocusEffect } from "@react-navigation/native"
-import PropertyCard from "@/components/PropertyCard"
 
 
 interface SavedProperty {
@@ -20,6 +21,7 @@ export default function SearchScreen() {
   const { userId } = useAuth()
   const authSupabase = useSupabase()
   const router = useRouter()
+  const setSavedCount = useUserStore((state) => state.setSavedCount)
 
   const [saved, setSaved] = useState<SavedProperty[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,7 +35,9 @@ export default function SearchScreen() {
       .eq("user_clerk_id", userId)
       .order("id", { ascending: false })
 
-    setSaved((data as unknown as SavedProperty[]) ?? [])
+    const savedProperties = (data as unknown as SavedProperty[]) ?? []
+    setSaved(savedProperties)
+    setSavedCount(savedProperties.length)
     setLoading(false)
   }, [userId])
 
@@ -45,12 +49,12 @@ export default function SearchScreen() {
 
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-gray-50">
+    <SafeAreaView edges={['top']} className="flex-1 bg-gray-50 dark:bg-gray-950">
       {/* Header */}
       <View className="px-5 pt-4 pb-3">
-        <Text className="text-2xl font-bold text-gray-900">Saved</Text>
+        <Text className="text-2xl font-bold text-gray-900 dark:text-white">Saved</Text>
         {!loading && (
-          <Text className="text-sm text-gray-400 mt-1">
+          <Text className="text-sm text-gray-400 dark:text-gray-500 mt-1">
             {saved.length} {saved.length === 1 ? "property" : "properties"}{" "} saved
           </Text>
         )}
@@ -75,14 +79,14 @@ export default function SearchScreen() {
           )}
 
           ListEmptyComponent={
-            <View className="flex-1 items-center justify-center py-24">
-              <View className="w-20 h-20 bg-red-50 rounded-full items-center justify-center mb-4">
-                <Ionicons name="bookmark-outline" size={30} color="#EF4444" />
+              <View className="flex-1 items-center justify-center py-24">
+                <View className="w-20 h-20 bg-red-50 dark:bg-red-950 rounded-full items-center justify-center mb-4">
+                  <Ionicons name="bookmark-outline" size={30} color="#EF4444" />
               </View>
-              <Text className="text-gray-700 text-lg font-bold mb-1">
+                <Text className="text-gray-700 dark:text-gray-200 text-lg font-bold mb-1">
                 No saved properties
               </Text>
-              <Text className="text-gray-400 text-sm text-center px-8">
+                <Text className="text-gray-400 dark:text-gray-500 text-sm text-center px-8">
                 Tap the heart icon on any property to save it here
               </Text>
               <TouchableOpacity
