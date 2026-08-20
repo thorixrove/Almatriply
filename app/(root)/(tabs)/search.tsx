@@ -195,6 +195,7 @@ export default function SearchScreen() {
           </View>
         )}
       </View>
+      
 
       {/* Result */}
       <FlatList
