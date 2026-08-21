@@ -1,21 +1,25 @@
-import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
-import {Feather} from "@expo/vector-icons"
-import { Tabs } from 'expo-router';
+
 import { useUserStore } from '@/store/useStore';
+import { Feather } from "@expo/vector-icons";
+import { Tabs } from 'expo-router';
+import { useColorScheme } from 'react-native';
 
 function AndroidTabs() {
   const isAdmin = useUserStore((state) => state.isAdmin)
-
+  const savedCount = useUserStore((state) => state.savedCount)
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  
 return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#4A9EFF",
-        tabBarInactiveTintColor: "#5C5F68",
+        tabBarActiveTintColor: isDark ? "#7DB7FF" : "#4A9EFF",
+        tabBarInactiveTintColor: isDark ? "#A0A4AE" : "#5C5F68",
         tabBarStyle: {
-          backgroundColor: "#FFFFFF",
-          borderTopColor: "#E8E6DF",
-          paddingTop: 4,
+          backgroundColor: isDark ? "#121212" : "#FFFFFF",
+          borderTopColor: isDark ? "#2C2C2C" : "#E8E6DF",
+          paddingTop: 10,
           height: 100,
         },
       }}
@@ -52,6 +56,7 @@ return (
         name="saved"
         options={{
           title: "Saved",
+          tabBarBadge: savedCount > 0 ? savedCount : undefined,
           tabBarIcon: ({ color, size }) => (
             <Feather name="bookmark" size={size} color={color} />
           ),

@@ -41,6 +41,36 @@ export function useSavedProperty(propertyId: string, onUnsave?: () => void) {
             .from("saved_properties")
             .insert({ user_clerk_id: userId, property_id: propertyId})
             setIsSaved(true)
+
+            // Notifikasi semua admin kalau ada yang nyimpen properti
+            const { data: admins, error: adminsError } = await authSupabase
+                .from("users")
+                .select("clerk_id")
+                .eq("is_admin", true)
+
+            console.log("Admins found:", admins, adminsError)
+
+            if (admins && admins.length > 0) {
+                const { data: propertyData } = await authSupabase
+                    .from("properties")
+                    .select("title")
+                    .eq("id", propertyId)
+                    .single()
+
+                const notifications = admins.map((admin) => ({
+                    user_clerk_id: admin.clerk_id,
+                    title: "Property Saved",
+                    body: `Seseorang menyimpan properti "${propertyData?.title ?? "properti"}".`,
+                    type: "property_saved",
+                    property_id: propertyId,
+                }))
+
+                const { error: notifError } = await authSupabase
+                    .from("notifications")
+                    .insert(notifications)
+
+                console.log("Notify admins insert error:", notifError)
+            }
         }
         setSaveLoading(false)
     }

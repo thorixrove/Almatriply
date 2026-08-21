@@ -52,7 +52,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView edges={['top']} className="flex-1 bg-gray-50 dark:bg-gray-950">
       <FlatList
         data={recommended}
         keyExtractor={(item) => item.id}
@@ -68,8 +68,8 @@ export default function HomeScreen() {
                 resizeMode="contain"
               />
               <View className="items-end">
-                <Text className="text-gray-500 text-xs">Good morning 👋</Text>
-                <Text className="text-gray-900 text-base font-bold">
+                <Text className="text-gray-500 dark:text-gray-400 text-xs">Good morning 👋</Text>
+                <Text className="text-gray-900 dark:text-white text-base font-bold">
                   {user?.firstName ?? "User"}
                 </Text>
               </View>
@@ -79,7 +79,7 @@ export default function HomeScreen() {
             {/* Search Bar */}
             <TouchableOpacity
               onPress={() => router.push("/(root)/(tabs)/search")}
-              className="mx-5 mb-6 flex-row items-center bg-white rounded-2xl px-4 py-3 gap-3"
+              className="mx-5 mb-6 flex-row items-center bg-white dark:bg-gray-900 rounded-2xl px-4 py-3 gap-3"
               style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 1 },
@@ -89,7 +89,7 @@ export default function HomeScreen() {
               }}
             >
               <Ionicons name="search-outline" size={18} color="#9CA3AF" />
-              <Text className="text-gray-400 text-sm flex-1">
+              <Text className="text-gray-400 dark:text-gray-500 text-sm flex-1">
                 Search properties, cities...
               </Text>
               <TouchableOpacity
@@ -105,7 +105,7 @@ export default function HomeScreen() {
 
             {/* Featured section */}
             <View className="mb-10">
-              <Text className="text-gray-900 text-lg font-bold px-5 mb-4">
+              <Text className="text-gray-900 dark:text-white text-lg font-bold px-5 mb-4">
                 Featured
               </Text>
               {loading ? (
@@ -127,7 +127,7 @@ export default function HomeScreen() {
             </View>
 
             {/* Recomende Header */}
-            <Text className="text-gray-900 text-lg font-bold px-5 mb-4">
+            <Text className="text-gray-900 dark:text-white text-lg font-bold px-5 mb-4">
               Recommended
             </Text>
           </View>
@@ -140,7 +140,7 @@ export default function HomeScreen() {
         ListEmptyComponent={
           !loading ? (
             <View className="items-center py-10">
-              <Text className="text-gray-400">No properties found</Text>
+              <Text className="text-gray-400 dark:text-gray-500">No properties found</Text>
             </View>
           ) : null
         }
