@@ -89,9 +89,46 @@ export default function PropertyDetailScreen() {
             .update({ is_sold: true })
             .eq("id", id)
           setProperty((prev) => (prev ? { ...prev, is_sold: true } : prev))
+
+          // Notifikasi semua user yang nyimpen properti ini
+          const { data: savers } = await authSupabase
+            .from("saved_properties")
+            .select("user_clerk_id")
+            .eq("property_id", id)
+
+          if (savers && savers.length > 0) {
+            const notifications = savers.map((s) => ({
+              user_clerk_id: s.user_clerk_id,
+              title: "Property Sold",
+              body: `${property?.title ?? "Properti"} yang kamu simpan baru saja terjual.`,
+              type: "property_sold",
+              property_id: id,
+            }))
+            await authSupabase.from("notifications").insert(notifications)
+          }
         },
       },
     ])
+  }
+
+  const handleUnmarkSold = () => {
+    Alert.alert(
+      "Kembalikan Properti",
+      "Properti ini akan ditandai belum terjual lagi. Lanjutkan?",
+      [
+        { text: "Batal", style: "cancel" },
+        {
+          text: "Kembalikan",
+          onPress: async () => {
+            await authSupabase
+              .from("properties")
+              .update({ is_sold: false })
+              .eq("id", id)
+            setProperty((prev) => (prev ? { ...prev, is_sold: false } : prev))
+          },
+        },
+      ]
+    )
   }
 
   const handleContact = () => {
@@ -341,7 +378,7 @@ export default function PropertyDetailScreen() {
           {/* Admin Actions */}
           {isAdmin && (
             <View className="flex-row gap-3">
-              {!property.is_sold && (
+              {!property.is_sold ? (
                 <TouchableOpacity
                   onPress={handleMarkSold}
                   className="flex-1 flex-row items-center justify-center gap-2 bg-amber-50 dark:bg-amber-950 py-4 rounded-2xl border border-amber-200 dark:border-amber-800"
@@ -353,6 +390,20 @@ export default function PropertyDetailScreen() {
                   />
                   <Text className="text-amber-600 dark:text-amber-400 font-semibold">
                     Mark Sold
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={handleUnmarkSold}
+                  className="flex-1 flex-row items-center justify-center gap-2 bg-green-50 dark:bg-green-950 py-4 rounded-2xl border border-green-200 dark:border-green-800"
+                >
+                  <Ionicons
+                  name="refresh-outline"
+                  size={18}
+                  color="#16A34A"
+                  />
+                  <Text className="text-green-600 dark:text-green-400 font-semibold">
+                    Kembalikan
                   </Text>
                 </TouchableOpacity>
               )}

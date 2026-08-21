@@ -1,14 +1,11 @@
-import { useUserStore } from "@/store/useStore"
+import { useSupabase } from "./useSupabase"
 import { useAuth } from "@clerk/expo"
 import { useEffect, useState } from "react"
-import { useSupabase } from "./useSupabase"
 
 
 export function useSavedProperty(propertyId: string, onUnsave?: () => void) {
     const {userId} = useAuth()
     const authSupabase = useSupabase()
-    const incrementSavedCount = useUserStore((state) => state.incrementSavedCount)
-    const decrementSavedCount = useUserStore((state) => state.decrementSavedCount)
 
     const [ isSaved, setIsSaved] = useState(false)
     const [ saveLoading, setSaveLoading] = useState(false)
@@ -38,14 +35,42 @@ export function useSavedProperty(propertyId: string, onUnsave?: () => void) {
             .eq("user_clerk_id", userId)
             .eq("property_id", propertyId)
             setIsSaved(false)
-            decrementSavedCount()
             onUnsave?.()
         } else {
             await authSupabase
             .from("saved_properties")
             .insert({ user_clerk_id: userId, property_id: propertyId})
             setIsSaved(true)
-            incrementSavedCount()
+
+            // Notifikasi semua admin kalau ada yang nyimpen properti
+            const { data: admins, error: adminsError } = await authSupabase
+                .from("users")
+                .select("clerk_id")
+                .eq("is_admin", true)
+
+            console.log("Admins found:", admins, adminsError)
+
+            if (admins && admins.length > 0) {
+                const { data: propertyData } = await authSupabase
+                    .from("properties")
+                    .select("title")
+                    .eq("id", propertyId)
+                    .single()
+
+                const notifications = admins.map((admin) => ({
+                    user_clerk_id: admin.clerk_id,
+                    title: "Property Saved",
+                    body: `Seseorang menyimpan properti "${propertyData?.title ?? "properti"}".`,
+                    type: "property_saved",
+                    property_id: propertyId,
+                }))
+
+                const { error: notifError } = await authSupabase
+                    .from("notifications")
+                    .insert(notifications)
+
+                console.log("Notify admins insert error:", notifError)
+            }
         }
         setSaveLoading(false)
     }

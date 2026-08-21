@@ -6,13 +6,15 @@ import { useColorScheme } from "nativewind"
 import { useEffect, useState } from "react"
 import { Linking, Switch, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { useDarkModeToggle } from "@/hooks/useDarkModeToggle"
 
 const PUSH_NOTIF_KEY = "settings_push_notifications"
-const DARK_MODE_KEY = "settings_dark_mode"
 
 export default function SettingsScreen() {
   const router = useRouter()
-  const { colorScheme, setColorScheme } = useColorScheme()
+  const { colorScheme } = useColorScheme()
+  // dark mode sekarang bersumber dari Supabase (per akun), bukan AsyncStorage
+  const { darkMode, toggleDarkMode } = useDarkModeToggle()
 
   const [pushEnabled, setPushEnabled] = useState(true)
   const [loaded, setLoaded] = useState(false)
@@ -23,23 +25,13 @@ export default function SettingsScreen() {
 
   const loadPreferences = async () => {
     const storedPush = await AsyncStorage.getItem(PUSH_NOTIF_KEY)
-    const storedDark = await AsyncStorage.getItem(DARK_MODE_KEY)
-
     if (storedPush !== null) setPushEnabled(storedPush === "true")
-    if (storedDark !== null) setColorScheme(storedDark === "dark" ? "dark" : "light")
-
     setLoaded(true)
   }
 
   const togglePush = async (value: boolean) => {
     setPushEnabled(value)
     await AsyncStorage.setItem(PUSH_NOTIF_KEY, String(value))
-  }
-
-  const toggleDarkMode = async (value: boolean) => {
-    const next = value ? "dark" : "light"
-    setColorScheme(next)
-    await AsyncStorage.setItem(DARK_MODE_KEY, next)
   }
 
   const appVersion = Constants.expoConfig?.version ?? "1.0.0"
@@ -85,7 +77,7 @@ export default function SettingsScreen() {
               label="Dark Mode"
               right={
                 <Switch
-                  value={colorScheme === "dark"}
+                  value={darkMode}
                   onValueChange={toggleDarkMode}
                 />
               }

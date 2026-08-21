@@ -1,8 +1,8 @@
 import { useAuth, useUser } from "@clerk/expo"
 import { Ionicons } from "@expo/vector-icons"
 import * as ImagePicker from "expo-image-picker"
-import { useRouter } from "expo-router"
-import { useState } from "react"
+import { useFocusEffect, useRouter } from "expo-router"
+import { useCallback, useState } from "react"
 import {
   ActivityIndicator,
   Alert,
@@ -14,13 +14,33 @@ import {
   View
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { useSupabase } from "@/hooks/useSupabase"
 
 export default function ProfileScreen() {
   const { user, isLoaded } = useUser()
-  const { signOut } = useAuth()
+  const { signOut, userId } = useAuth()
   const router = useRouter()
+  const authSupabase = useSupabase()
   const [isUpdating, setIsUpdating] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
   const isDark = useColorScheme() === "dark"
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUnreadCount()
+    }, [userId])
+  )
+
+  const fetchUnreadCount = async () => {
+    if (!userId) return
+    const { count } = await authSupabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_clerk_id", userId)
+      .eq("is_read", false)
+
+    setUnreadCount(count ?? 0)
+  }
 
   const handleSignOut = async () => {
     try {
@@ -129,6 +149,7 @@ export default function ProfileScreen() {
         <MenuItem
           icon="notifications-outline"
           label="Notifications"
+          badge={unreadCount}
           onPress={() => router.push("/(root)/notifications")}
           darkMode={isDark}
         />
@@ -176,12 +197,14 @@ function MenuItem({
   icon,
   label,
   onPress,
-  darkMode
+  darkMode,
+  badge
 }: {
   icon: keyof typeof Ionicons.glyphMap
   label: string
   onPress?: () => void
   darkMode: boolean
+  badge?: number
 }) {
   return (
     <TouchableOpacity
@@ -190,11 +213,20 @@ function MenuItem({
         darkMode ? "bg-slate-900" : "bg-gray-50"
       }`}
     >
-      <Ionicons
-        name={icon}
-        size={22}
-        color={darkMode ? "#CBD5E1" : "#6B7280"}
-      />
+      <View className="relative">
+        <Ionicons
+          name={icon}
+          size={22}
+          color={darkMode ? "#CBD5E1" : "#6B7280"}
+        />
+        {!!badge && badge > 0 && (
+          <View className="absolute -top-1.5 -right-1.5 bg-red-500 rounded-full min-w-[16px] h-4 px-1 items-center justify-center">
+            <Text className="text-white text-[10px] font-bold">
+              {badge > 9 ? "9+" : badge}
+            </Text>
+          </View>
+        )}
+      </View>
       <Text
         className={`flex-1 font-medium text-base ${
           darkMode ? "text-slate-200" : "text-gray-700"
