@@ -27,6 +27,7 @@ import ImageViewing from "react-native-image-viewing";
 import { useSavedProperty } from "@/hooks/useSavedProperty";
 import { formatPrice } from "@/lib/utils";
 import { useSupabase } from "@/hooks/useSupabase";
+import { sendPushNotifications } from "@/lib/pushNotifications";
 
 
 const { width } = Dimensions.get("window")
@@ -105,6 +106,24 @@ export default function PropertyDetailScreen() {
               property_id: id,
             }))
             await authSupabase.from("notifications").insert(notifications)
+
+            // Kirim push notification beneran ke device masing-masing saver
+            const clerkIds = savers.map((s) => s.user_clerk_id)
+            const { data: saverUsers } = await authSupabase
+              .from("users")
+              .select("expo_push_token")
+              .in("clerk_id", clerkIds)
+
+            const tokens = (saverUsers ?? [])
+              .map((u) => u.expo_push_token)
+              .filter((t): t is string => !!t)
+
+            await sendPushNotifications(
+              tokens,
+              "Property Sold",
+              `${property?.title ?? "Properti"} yang kamu simpan baru saja terjual.`,
+              { property_id: id }
+            )
           }
         },
       },

@@ -1,37 +1,65 @@
 import { Ionicons } from "@expo/vector-icons"
-import AsyncStorage from "@react-native-async-storage/async-storage"
 import Constants from "expo-constants"
 import { useRouter } from "expo-router"
 import { useColorScheme } from "nativewind"
 import { useEffect, useState } from "react"
-import { Linking, Switch, Text, TouchableOpacity, View } from "react-native"
+import { Alert, Switch, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useDarkModeToggle } from "@/hooks/useDarkModeToggle"
-
-const PUSH_NOTIF_KEY = "settings_push_notifications"
+import { usePushNotifications } from "@/hooks/usePushNotifications"
+import { useSupabase } from "@/hooks/useSupabase"
+import { useAuth } from "@clerk/expo"
 
 export default function SettingsScreen() {
   const router = useRouter()
   const { colorScheme } = useColorScheme()
   // dark mode sekarang bersumber dari Supabase (per akun), bukan AsyncStorage
   const { darkMode, toggleDarkMode } = useDarkModeToggle()
+  const { userId } = useAuth()
+  const authSupabase = useSupabase()
+  const { registerForPushNotifications, unregisterPushNotifications } =
+    usePushNotifications()
 
-  const [pushEnabled, setPushEnabled] = useState(true)
+  const [pushEnabled, setPushEnabled] = useState(false)
+  const [pushLoading, setPushLoading] = useState(false)
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     loadPreferences()
-  }, [])
+  }, [userId])
 
   const loadPreferences = async () => {
-    const storedPush = await AsyncStorage.getItem(PUSH_NOTIF_KEY)
-    if (storedPush !== null) setPushEnabled(storedPush === "true")
+    if (!userId) return
+    const { data } = await authSupabase
+      .from("users")
+      .select("expo_push_token")
+      .eq("clerk_id", userId)
+      .single()
+
+    setPushEnabled(!!data?.expo_push_token)
     setLoaded(true)
   }
 
   const togglePush = async (value: boolean) => {
-    setPushEnabled(value)
-    await AsyncStorage.setItem(PUSH_NOTIF_KEY, String(value))
+    setPushLoading(true)
+
+    if (value) {
+      const granted = await registerForPushNotifications()
+      if (!granted) {
+        Alert.alert(
+          "Izin Diperlukan",
+          "Aktifkan izin notifikasi buat aplikasi ini di pengaturan HP kamu."
+        )
+        setPushLoading(false)
+        return
+      }
+      setPushEnabled(true)
+    } else {
+      await unregisterPushNotifications()
+      setPushEnabled(false)
+    }
+
+    setPushLoading(false)
   }
 
   const appVersion = Constants.expoConfig?.version ?? "1.0.0"
@@ -68,7 +96,11 @@ export default function SettingsScreen() {
               icon="notifications-outline"
               label="Push Notifications"
               right={
-                <Switch value={pushEnabled} onValueChange={togglePush} />
+                <Switch
+                  value={pushEnabled}
+                  onValueChange={togglePush}
+                  disabled={pushLoading}
+                />
               }
             />
             <View className="h-px bg-gray-100 dark:bg-gray-800 ml-14" />
@@ -95,18 +127,14 @@ export default function SettingsScreen() {
               icon="document-text-outline"
               label="Privacy Policy"
               chevron
-              onPress={() =>
-                Linking.openURL("https://your-privacy-policy-url.com")
-              }
+              onPress={() => router.push("/(root)/privacy-policy")}
             />
             <View className="h-px bg-gray-100 dark:bg-gray-800 ml-14" />
             <SettingRow
               icon="reader-outline"
               label="Terms of Service"
               chevron
-              onPress={() =>
-                Linking.openURL("https://your-terms-url.com")
-              }
+              onPress={() => router.push("/(root)/terms-of-service")}
             />
             <View className="h-px bg-gray-100 dark:bg-gray-800 ml-14" />
             <SettingRow

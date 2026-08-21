@@ -1,4 +1,5 @@
 import { useSupabase } from "./useSupabase"
+import { sendPushNotifications } from "@/lib/pushNotifications"
 import { useAuth } from "@clerk/expo"
 import { useEffect, useState } from "react"
 
@@ -43,12 +44,10 @@ export function useSavedProperty(propertyId: string, onUnsave?: () => void) {
             setIsSaved(true)
 
             // Notifikasi semua admin kalau ada yang nyimpen properti
-            const { data: admins, error: adminsError } = await authSupabase
+            const { data: admins } = await authSupabase
                 .from("users")
-                .select("clerk_id")
+                .select("clerk_id, expo_push_token")
                 .eq("is_admin", true)
-
-            console.log("Admins found:", admins, adminsError)
 
             if (admins && admins.length > 0) {
                 const { data: propertyData } = await authSupabase
@@ -64,12 +63,19 @@ export function useSavedProperty(propertyId: string, onUnsave?: () => void) {
                     type: "property_saved",
                     property_id: propertyId,
                 }))
+                await authSupabase.from("notifications").insert(notifications)
 
-                const { error: notifError } = await authSupabase
-                    .from("notifications")
-                    .insert(notifications)
+                // Kirim push notification beneran ke admin
+                const tokens = admins
+                    .map((a) => a.expo_push_token)
+                    .filter((t): t is string => !!t)
 
-                console.log("Notify admins insert error:", notifError)
+                await sendPushNotifications(
+                    tokens,
+                    "Property Saved",
+                    `Seseorang menyimpan properti "${propertyData?.title ?? "properti"}".`,
+                    { property_id: propertyId }
+                )
             }
         }
         setSaveLoading(false)
