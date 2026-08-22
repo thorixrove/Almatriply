@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "369802416078",
+    "project_id": "almatriply",
+    "storage_bucket": "almatriply.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369802416078:android:470b8f9fc4528162e7659f",
+        "android_client_info": {
+          "package_name": "com.thorixrover.almatriply"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHmr18EQMsFgxIvpPxundXgNQRetTTEbM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
